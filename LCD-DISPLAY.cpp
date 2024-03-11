@@ -1,4 +1,6 @@
 ////////////TO DISPLAY THE TEXT ON THE LCD////////////
+//library link : https://os.mbed.com/users/sstaub/code/mbedLCDi2c/
+
 #include "mbed.h"
 #include "LCDi2c.h"
 
