@@ -36,3 +36,51 @@ int main() {
 
     // No need to clear the display or sleep in this simple static message scenario
 }
+
+
+//////////Scrolling     Effect///////=------------------
+#include "mbed.h"
+#include "LCDi2c.h"
+
+// Initialize the LCD. Assuming default I2C pins and the correct I2C address.
+LCDi2c lcd(LCD16x2, 0x27);
+
+int main() {
+    // The message to scroll
+    const char* message = "SEP600 Embedded System is Awesome  ";
+    const int messageLength = strlen(message); // Length of the message
+
+    // Full message buffer that includes space for the display width
+    const int displayWidth = 16;
+    char displayBuffer[displayWidth + 1]; // +1 for the null-terminator
+
+    int startIndex = 0; // Start index of the message to be displayed
+
+    while (true) {
+        // Copy a substring of the message into the display buffer
+        for (int i = 0; i < displayWidth; ++i) {
+            int messageIndex = (startIndex + i) % messageLength;
+            displayBuffer[i] = message[messageIndex];
+        }
+
+        // Null-terminate the string
+        displayBuffer[displayWidth] = '\0';
+
+        // Show the substring on the display
+        lcd.cls(); // Clear display
+        lcd.locate(0, 0); // Set cursor to the start
+        lcd.printf(displayBuffer); // Display the substring
+
+        // Increase the start index for the next frame of the scroll
+        startIndex++;
+        if (startIndex >= messageLength) {
+            startIndex = 0;
+        }
+
+        // Delay between scroll steps
+        ThisThread::sleep_for(300ms);
+    }
+}
+
+
+
