@@ -82,5 +82,34 @@ int main() {
     }
 }
 
+//-----------------Another     way     for Scrolling     Effect -------------------//
+#include "mbed.h"
+#include "LCDi2c.h"
+
+LCDi2c lcd(LCD16x2, 0x27); // Initialize the LCD
+
+int main() {
+    lcd.cls(); // Clear display
+    
+    // Since the display is only 16 characters wide, start with some space
+    lcd.locate(0, 0);
+    lcd.printf("                "); // 16 spaces
+
+    // Full message to scroll
+    const char* fullMessage = "                SEP600 Embedded System is Awesome                ";
+    const int messageLen = strlen(fullMessage);
+
+    while (true) {
+        // Print the message on the display with scrolling effect
+        for (int i = 0; i < messageLen - 16; i++) {
+            lcd.locate(0, 0);
+            for (int j = 0; j < 16; j++) {
+                lcd.putc(fullMessage[i + j]);
+            }
+            ThisThread::sleep_for(300ms); // Delay between shifts
+        }
+    }
+}
+
 
 
