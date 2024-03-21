@@ -6,18 +6,29 @@ using namespace std;
 DigitalOut rowPins[4] = {PTC12, PTC8, PTC7, PTC6}; // Rows
 DigitalIn colPins[4] = {PTC5, PTC4, PTC3, PTC2}; // Columns
 
-InterruptIn resetButton(PTC16); // Initialize the push button on pin PTC16
-DigitalOut led(LED1); // Assume there is a LED to indicate reset
+InterruptIn resetButton(PTD1); // Initialize the push button on pin PTC16
+DigitalOut redLED(PTE8);
+DigitalOut greenLED(PTE7);
 
 // LCD setup
 LCDi2c lcd(LCD16x2, 0x27); // LCD type and I2C address
-const string correctCode = "1234"; // Define the correct code
-const string masterCode = "87654321"; // Define the master code
+const string correctCode = "9995"; // Define the correct code
+const string masterCode = "88994455"; // Define the master code
 string enteredCode = "";
 int attempts = 3; // Number of attempts for the regular code
 int masterAttempts = 2; // Number of attempts for the master code
 bool masterCodeMode = false; // Flag to track if the system is in master code mode
 bool systemLocked = false; // Flag to indicate system is locked and needs reset
+void greenOn() {
+    greenLED = 1; // Turn on green LED
+    redLED = 0;   // Make sure red LED is off
+}
+
+void redOn() {
+    redLED = 1;   // Turn on red LED
+    greenLED = 0; // Make sure green LED is off
+}
+
 
 
 void initKeypad() {
@@ -29,6 +40,7 @@ void initKeypad() {
     }
 }
 void displayWelcomeMessage() {
+    greenOn();
     lcd.cls(); // Clear the LCD
     lcd.locate(0, 0);
     lcd.printf("Enter your access");
@@ -63,12 +75,14 @@ void displayAttemptsLeft() {
     displayWelcomeMessage(); // Go back to the welcome message
 }
 void displayMasterCodeEntry() {
+    redOn();
     lcd.cls(); // Clear the LCD
     lcd.locate(0, 0);
     lcd.printf("Master Code:");
 }
 
 void displayIncorrectMasterCode() {
+    redOn();
     lcd.cls(); // Clear the LCD
     lcd.locate(0, 0);
     lcd.printf("Incorrect Master");
@@ -79,6 +93,7 @@ void displayIncorrectMasterCode() {
 }
 
 void displayFinalMessage() {
+redOn();
     systemLocked = true; // Set system locked flag
     lcd.cls(); // Clear the LCD
     lcd.locate(0, 0);
@@ -89,6 +104,7 @@ void displayFinalMessage() {
 
 
 void resetSystem() {
+    greenOn();
     systemLocked = false; // Clear system locked flag
     attempts = 3; // Reset attempt counter
     masterAttempts = 2; // Reset master code attempt counter
@@ -106,23 +122,31 @@ void setupResetButton() {
     resetButton.mode(PullUp); // Enable internal pull-up resistor
     resetButton.fall(&isr_resetSystem); // Attach ISR for the reset system
 }
-
 void checkCode(const string &code) {
+    greenOn();
     lcd.cls(); // Clear the LCD
     lcd.locate(0, 0);
-    lcd.printf("Verifying...");
+        lcd.printf("Verifying...");
     ThisThread::sleep_for(2s); // Simulate the time taken to verify the code
-
     if ((code == correctCode && !masterCodeMode) || (code == masterCode && masterCodeMode)) {
         lcd.cls(); // Clear the LCD
         lcd.locate(0, 0);
-        lcd.printf(masterCodeMode ? "Master OK" : "Unlocked");
+        if(masterCodeMode)
+        {
+            redOn();
+            lcd.printf("Master OK");
+            ThisThread::sleep_for(2s);
+
+        }else {
+        greenOn();     
+        lcd.printf("Unlocked");
         ThisThread::sleep_for(2s);
+
+        }
         resetSystem(); // Reset system to initial state
     } else {
         lcd.cls(); // Clear the LCD
         lcd.locate(0, 0);
-        
         if (masterCodeMode) {
             --masterAttempts;
             if(masterAttempts <= 0) {
