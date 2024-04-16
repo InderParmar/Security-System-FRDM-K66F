@@ -2,6 +2,7 @@
 
 // Define the pins for the rows and columns
 DigitalOut rowPins[4] = {PTC12, PTC8, PTC7, PTC6}; // Rows
+
 DigitalIn colPins[4] = {PTC5, PTC4, PTC3, PTC2}; // Columns
 
 void init() {
@@ -14,6 +15,7 @@ void init() {
         colPin.mode(PullUp);
     }
 }
+
 
 int main() {
     init();
